@@ -1,5 +1,3 @@
-version: 2.1
-
 commands:
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
@@ -289,10 +287,10 @@ jobs:
 #            
 #
 workflows:
-  default:
+  deploy_workflow:
     jobs:
       - build-frontend
-      - build-backend
+      - build-backend:
           requires:
             - build-frontend
       - test-frontend:
