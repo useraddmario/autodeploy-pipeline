@@ -73,7 +73,6 @@ jobs:
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build
-      - fail_switch
       - slack-fail-notify
       - slack-pass-notify
 
