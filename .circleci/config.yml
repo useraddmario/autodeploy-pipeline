@@ -1,4 +1,28 @@
+version: 2.1
+orbs:
+  slack: circleci/slack@4.1.1
 commands:
+  fail_switch:
+    steps:
+      - run:
+          name: Deployment failure switch
+          command: |
+            exit 1
+
+  slack-fail-notify:
+    description: Alert the slack channel on deployment failure
+    steps:
+      - slack/notify:
+          event: fail
+          template: basic_fail_1
+
+  slack-pass-notify:
+    description: Alert the slack channel on deployment success
+    steps:
+      - slack/notify:
+          event: pass
+          template: success_tagged_deploy_1
+
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     parameters:
@@ -49,6 +73,9 @@ jobs:
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build
+      - fail_switch
+      - slack-fail-notify
+      - slack-pass-notify
 
   build-backend:
     docker:
@@ -68,6 +95,8 @@ jobs:
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
+      - slack-fail-notify
+      - slack-pass-notify
 
   test-frontend:
     docker:
@@ -82,6 +111,9 @@ jobs:
             cd frontend
             npm i
             npm test
+      - slack-fail-notify
+      - slack-pass-notify
+
   test-backend:
     docker:
       - image: circleci/node:13.8.0
@@ -95,6 +127,8 @@ jobs:
             cd backend
             npm i
             npm test
+      - slack-fail-notify
+      - slack-pass-notify
             
   scan-frontend:
     docker:
@@ -109,6 +143,8 @@ jobs:
             cd frontend
             npm i
             npm audit --audit-level=critical
+      - slack-fail-notify
+      - slack-pass-notify
 
   scan-backend:
     docker:
@@ -123,6 +159,8 @@ jobs:
             cd backend
             npm i
             npm audit fix --audit-level=critical --force
+      - slack-fail-notify
+      - slack-pass-notify
 
 #  deploy-infrastructure:
 #    docker:
