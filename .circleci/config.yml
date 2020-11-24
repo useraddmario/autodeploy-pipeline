@@ -201,7 +201,7 @@ jobs:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
-      - rollback_infra_stacks 
+#      - rollback_infra_stacks 
       - slack-fail-notify
       - slack-pass-notify
 
