@@ -171,6 +171,8 @@ jobs:
     steps:
       - aws_dependencies
       - checkout
+      - restore_cache:
+          keys: [frontend-build]
       - run:
           name: Ensure back-end infrastructure exists
           command: |
@@ -347,8 +349,6 @@ workflows:
           context:
             - aws
             - slack
-          requires:
-            - build-frontend
       - test-frontend:
           context:
             - aws
