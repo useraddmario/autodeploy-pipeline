@@ -193,6 +193,8 @@ jobs:
       - run:
           name: Add back-end ip to ansible inventory
           command: |
+            pwd
+            ls
             touch project/.circleci/ansible/inventory.txt
             >project/.circleci/ansible/inventory.txt
             echo [ec2] >> project/.circleci/ansible/inventory.txt
