@@ -17,7 +17,7 @@ commands:
       - run:
           name: Install dependencies for AWS Linux 2
           command: |
-            yum -y install jq
+            yum -y install jq tar less gzip
   fail_switch:
     steps:
       - run:
