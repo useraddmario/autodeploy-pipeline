@@ -12,6 +12,12 @@ commands:
             aws cloudformation delete-stack --stack-name "backend-${CIRCLE_WORKFLOW_ID:0:7}" 
             aws cloudformation wait stack-delete-complete --stack-name "backend-${CIRCLE_WORKFLOW_ID:0:7}" 
           when: on_fail
+  aws_dependencies:
+    steps:
+      - run:
+          name: Install dependencies for AWS Linux 2
+          command: |
+            yum -y install jq
   fail_switch:
     steps:
       - run:
@@ -163,6 +169,7 @@ jobs:
     docker:
       - image: amazon/aws-cli
     steps:
+      - aws_dependencies
       - checkout
       - run:
           name: Ensure back-end infrastructure exists
