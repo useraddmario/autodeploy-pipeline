@@ -2,6 +2,16 @@ version: 2.1
 orbs:
   slack: circleci/slack@4.1.1
 commands:
+  rollback_infra_stacks:
+    steps:
+      - run:
+          name: Rollback Infra
+          command: |
+            aws cloudformation delete-stack --stack-name "frontend-${CIRCLE_WORKFLOW_ID:0:7}" 
+            aws cloudformation wait stack-delete-complete --stack-name "frontend-${CIRCLE_WORKFLOW_ID:0:7}" 
+            aws cloudformation delete-stack --stack-name "backend-${CIRCLE_WORKFLOW_ID:0:7}" 
+            aws cloudformation wait stack-delete-complete --stack-name "backend-${CIRCLE_WORKFLOW_ID:0:7}" 
+          when: on_fail
   fail_switch:
     steps:
       - run:
@@ -22,18 +32,6 @@ commands:
       - slack/notify:
           event: pass
           template: success_tagged_deploy_1
-
-  destroy-environment:
-    description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
-    parameters:
-      # Add parameter here   
-    steps:
-      - run:
-          name: Destroy environments
-          when: on_fail
-          command: |
-            # Your code here
-            exit 1
 
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
@@ -161,40 +159,42 @@ jobs:
       - slack-fail-notify
       - slack-pass-notify
 
-#  deploy-infrastructure:
-#    docker:
-#      # Docker image here that supports AWS CLI
-#    steps:
-#      # Checkout code from git
-#      - run:
-#          name: Ensure back-end infrastructure exists
-#          command: |
-#            aws cloudformation deploy \
-#              --template-file .circleci/files/backend.yml \
-#              #--tags project=your-tag \
-#              # --stack-name "your back-end stack name with workflow id" \
-#              # --parameter-overrides ID="your workflow id"  
-#              exit 1
-#      - run:
-#          name: Ensure front-end infrastructure exist
-#          command: |
-#            aws cloudformation deploy \
-#              --template-file .circleci/files/frontend.yml \
-#              #--tags project=your-tag \
-#              # --stack-name "your front-end stack name with workflow id" \
-#              # --parameter-overrides ID="your workflow id"  
-#              exit 1
-#      - run:
-#          name: Add back-end ip to ansible inventory
-#          command: |
-#            # Your code here
-#            exit 1
-#      - persist_to_workspace:
-#          root: ~/
-#          paths:
-#            - project/.circleci/ansible/inventory.txt
-#      # Here's where you will add some code to rollback on failure      
-#
+  deploy-infrastructure:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Ensure back-end infrastructure exists
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/backend.yml \
+              --tags project=udapeople-backend \
+              --stack-name "backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
+      - run:
+          name: Ensure front-end infrastructure exists
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/frontend.yml \
+              --tags project=udapeople-frontend \
+              --stack-name "your front-end stack name with workflow id" \
+              --stack-name "frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
+      - run:
+          name: Add back-end ip to ansible inventory
+          command: |
+            >project/.circleci/ansible/inventory.txt
+            echo [ec2] >> project/.circleci/ansible/inventory.txt
+            aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:Name,Values=!Sub backend-${CIRCLE_WORKFLOW_ID:0:7}" --output text >> project/.circleci/ansible/inventory.txt
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project/.circleci/ansible/inventory.txt
+      - rollback_infra_stacks 
+      - slack-fail-notify
+      - slack-pass-notify
+
 #  configure-infrastructure:
 #    docker:
 #      # Docker image here that supports Ansible
@@ -332,32 +332,47 @@ workflows:
   default:
     jobs:
       - build-frontend:
-          context: slack
+          context:
+            - aws
+            - slack
       - build-backend:
-          context: slack
+          context:
+            - aws
+            - slack
           requires:
             - build-frontend
       - test-frontend:
-          context: slack
+          context:
+            - aws
+            - slack
           requires:
             - build-frontend
       - test-backend:
-          context: slack
+          context:
+            - aws
+            - slack
           requires:
             - build-backend
       - scan-backend:
-          context: slack
+          context:
+            - aws
+            - slack
           requires:
             - build-backend
       - scan-frontend:
-          context: slack
+          context:
+            - aws
+            - slack
           requires:
             - build-frontend
-      #- deploy-infrastructure:
-      #    requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-      #    filters:
-      #      branches:
-      #        only: [test-feature-branch]
+      - deploy-infrastructure:
+          context:
+            - aws
+            - slack
+          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+          #    filters:
+          #  branches:
+          #    only: [test-feature-branch]
       #- configure-infrastructure:
       #    requires: [deploy-infrastructure]
       #- run-migrations:
