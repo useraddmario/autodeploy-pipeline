@@ -229,7 +229,7 @@ jobs:
             ls
             #cat inventory
             python -m pip install --user ansible
-            ansible-playbook roles/configure-server/main.yml
+            ansible-playbook roles/configure-server/tasks/main.yml
       #- persist_to_workspace:
       #root: /home/circleci
       #paths:
