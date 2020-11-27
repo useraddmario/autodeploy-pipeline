@@ -10,27 +10,23 @@ environment:
   TYPEORM_PASSWORD: Linux6332!
   TYPEORM_DATABASE: udacity
 
-- name: "Update apt packages"
-  become: yes
-  apt:
-    update_cache: yes
+  - name: "Update apt packages"
+    apt:
+      update_cache: yes
 
-- name: "Upgrade packages"
-  become: true
-  apt:
-    upgrade: yes
+  - name: "Upgrade packages"
+    apt:
+      upgrade: yes
 
-- name: "Install dependencies"
-  become: true
-  apt:
-    name: ["nodejs", "npm"]
-    state: latest
-    update_cache: yes
+  - name: "Install dependencies"
+    apt:
+      name: ["nodejs", "npm"]
+      state: latest
+      update_cache: yes
 
-- name: "Install pm2"
-  become: true
-  npm:
-    name: pm2
-    global: yes
-    production: yes
-    state: present
+  - name: "Install pm2"
+    npm:
+      name: pm2
+      global: yes
+      production: yes
+      state: present

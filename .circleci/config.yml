@@ -218,20 +218,24 @@ jobs:
       - run:
           name: "Ansible control server install and playbook run"
           command: |
+            pwd
+            ls
             cd /home/circleci/
             curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
             sudo unzip awscliv2.zip
             sudo bash ./aws/install
-            cd /home/circleci/project
+            cd /home/circleci/project/.circleci/ansible
+            cat inventory
+            pwd
             ls
             python -m pip install --user ansible
-            ansible-playbook .circleci/ansible/configure-server.yml
+            ansible-playbook roles/configure-server/configure-server.yml
       #- persist_to_workspace:
       #root: /home/circleci
       #paths:
       #      - project
       #- fail_switch
-      - rollback_infra_stacks
+      #- rollback_infra_stacks
       - slack-fail-notify
       - slack-pass-notify
 
