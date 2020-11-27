@@ -225,9 +225,9 @@ jobs:
             sudo unzip awscliv2.zip
             sudo bash ./aws/install
             cd /home/circleci/project/.circleci/ansible
-            cat inventory
             pwd
             ls
+            #cat inventory
             python -m pip install --user ansible
             ansible-playbook roles/configure-server/configure-server.yml
       #- persist_to_workspace:
