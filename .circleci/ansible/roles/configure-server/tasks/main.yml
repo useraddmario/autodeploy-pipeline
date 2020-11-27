@@ -1,30 +1,17 @@
 ---
-
-environment:
-  ENVIRONMENT: production
-  TYPEORM_CONNECTION: postgres
-  TYPEORM_ENTITIES: ./src/modules/domain/**/*.entity.ts
-  TYPEORM_HOST: udacitydbinstance.cvytxmjpn0mz.us-west-2.rds.amazonaws.com
-  TYPEORM_PORT: 5432
-  TYPEORM_USERNAME: postgres
-  TYPEORM_PASSWORD: Linux6332!
-  TYPEORM_DATABASE: udacity
-
-  - name: "Update apt packages"
+  - name: Upgrade packages
     apt:
+      name: "*"
       update_cache: yes
-
-  - name: "Upgrade packages"
-    apt:
       upgrade: yes
 
-  - name: "Install dependencies"
+  - name: Install dependencies
     apt:
       name: ["nodejs", "npm"]
       state: latest
       update_cache: yes
 
-  - name: "Install pm2"
+  - name: Install pm2
     npm:
       name: pm2
       global: yes
