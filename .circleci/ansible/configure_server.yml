@@ -16,12 +16,12 @@
   roles:
     - configure-server
 
-  environment:
-    ENVIRONMENT: production
-    TYPEORM_CONNECTION: postgres
-    TYPEORM_ENTITIES: ./src/modules/domain/**/*.entity.ts
-    TYPEORM_HOST: udacitydbinstance.cvytxmjpn0mz.us-west-2.rds.amazonaws.com
-    TYPEORM_PORT: 5432
-    TYPEORM_USERNAME: postgres
-    TYPEORM_PASSWORD: Linux6332!
-    TYPEORM_DATABASE: udacity
+      #  environment:
+      #    ENVIRONMENT: production
+      #    TYPEORM_CONNECTION: postgres
+      #    TYPEORM_ENTITIES: ./src/modules/domain/**/*.entity.ts
+      #    TYPEORM_HOST: udacitydbinstance.cvytxmjpn0mz.us-west-2.rds.amazonaws.com
+      #    TYPEORM_PORT: 5432
+      #    TYPEORM_USERNAME: postgres
+      #    TYPEORM_PASSWORD: Linux6332!
+      #    TYPEORM_DATABASE: udacity
