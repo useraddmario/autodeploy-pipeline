@@ -200,7 +200,7 @@ jobs:
             echo [ec2] >> .circleci/ansible/inventory
             aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:project,Values=udapeople-backend" --output text >> .circleci/ansible/inventory
       - persist_to_workspace:
-          root: ~/project/.circleci/ansible
+          root: ~/project/.circleci/ansible/
           paths:
             - inventory
 #      - fail_switch
@@ -214,7 +214,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: ~/project/.circleci/ansible/inventory
+          at: ~/project/.circleci/ansible
       - add_ssh_keys:
           fingerprints: ["b4:f5:d1:d2:18:51:66:f6:39:d4:09:da:af:00:2e:82"]
       - run:
@@ -231,7 +231,7 @@ jobs:
             ls
             #cat inventory
             python -m pip install --user ansible
-            ansible-playbook roles/configure_server/tasks/main.yml
+            ansible-playbook configure_server.yml
       #- persist_to_workspace:
       #root: /home/circleci
       #paths:
