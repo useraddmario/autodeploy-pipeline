@@ -1,19 +1,19 @@
 ---
-  - name: Upgrade packages
-    apt:
-      name: "*"
-      update_cache: yes
-      upgrade: yes
+- name: Upgrade packages
+  apt:
+    name: "*"
+    update_cache: yes
+    upgrade: yes
 
-  - name: Install dependencies
-    apt:
-      name: ["nodejs", "npm"]
-      state: latest
-      update_cache: yes
+- name: Install dependencies
+  apt:
+    name: ["nodejs", "npm"]
+    state: latest
+    update_cache: yes
 
-  - name: Install pm2
-    npm:
-      name: pm2
-      global: yes
-      production: yes
-      state: present
+- name: Install pm2
+  npm:
+    name: pm2
+    global: yes
+    production: yes
+    state: present
