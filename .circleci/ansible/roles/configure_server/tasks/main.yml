@@ -2,8 +2,7 @@
 - name: Upgrade packages
   apt:
     name: "*"
-    update_cache: yes
-    upgrade: yes
+    state: latest
 
 - name: Install dependencies
   apt:
