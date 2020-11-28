@@ -1,4 +1,9 @@
 ---
+  name: configure_server
+  hosts: ec2
+  become: yes
+
+  tasks:
   - name: Upgrade packages
     apt:
       name: "*"
