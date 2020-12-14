@@ -243,8 +243,10 @@ jobs:
           command: |
             # Your code here
             cd backend
+            npm audit fix --audit-level=critical --force
             touch dbmigration
             npm i
+
             npm migrations >> dbmigration
       - run:
           name: Send migration results to memstash
