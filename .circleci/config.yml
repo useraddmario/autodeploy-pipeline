@@ -240,7 +240,7 @@ jobs:
       - restore_cache:
           keys: [backend-build]
       - attach_workspace:
-        at: ./backend
+          at: ./backend
       - run:
           name: Run migrations
           command: |
