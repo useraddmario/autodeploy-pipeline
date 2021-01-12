@@ -254,7 +254,7 @@ jobs:
           command: |
             # Your code here
             cd backend
-            if grep "has been executed successfully" migrations
+            if grep "has been executed successfully" dbmigrations
             then
               curl -H "Content-Type: text/plain" -H "token: migration_${CIRCLE_WORKFLOW_ID}" --request PUT --data "1" https://api.memstash.io/values/
             else
