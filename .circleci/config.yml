@@ -254,11 +254,11 @@ jobs:
           command: |
             # Your code here
             cd backend
-            if grep "has been executed successfully" dbmigrations
+            if grep -q "has been executed successfully" dbmigrations
             then
-              curl -H "Content-Type: text/plain" -H "token: migration_${CIRCLE_WORKFLOW_ID}" --request PUT --data "1" https://api.memstash.io/values/
+            curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID}" --request PUT --data "1" https://api.memstash.io/values/migration-${CIRCLE_WORKFLOW_ID}
             else
-              curl -H "Content-Type: text/plain" -H "token: migration_${CIRCLE_WORKFLOW_ID}" --request PUT --data "0" https://api.memstash.io/values/
+            curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID}" --request PUT --data "0" https://api.memstash.io/values/migration-${CIRCLE_WORKFLOW_ID}
               
      # Here's where you will add some code to rollback on failure      
      #- rollback_infra_stacks
