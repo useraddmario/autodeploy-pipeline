@@ -261,8 +261,7 @@ jobs:
                 curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" --request PUT --data "false" https://api.memstash.io/values/<< pipeline.id >>_migrations
             fi
               
-     # Here's where you will add some code to rollback on failure      
-     #- rollback_infra_stacks
+      - rollback_infra_stacks
       - slack-fail-notify
       - slack-pass-notify
             
@@ -424,8 +423,11 @@ workflows:
           context:
             - aws
             - slack
-      #- deploy-frontend:
-      #    requires: [run-migrations]
+      - deploy-frontend:
+          requires: [run-migrations]
+          context:
+            - aws
+            - slack
       #- deploy-backend:
       #    requires: [run-migrations]
       #- smoke-test:
