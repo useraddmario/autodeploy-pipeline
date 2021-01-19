@@ -278,14 +278,14 @@ jobs:
           name: Get backend url
           command: |
             touch ec2ipaddy
-            BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:project,Values=udapeople-backend" --output text)
-            export $BACKEND_IP
+            export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:project,Values=udapeople-backend" --output text)
             export API_URL=http://$BACKEND_IP:3030
             echo $API_URL
             echo $BACKEND_IP
       - run:
           name: Deploy frontend objects
           command: |
+            pwd
             cd frontend
             npm i
             npm run build
