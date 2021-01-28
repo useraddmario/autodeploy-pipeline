@@ -265,20 +265,24 @@ jobs:
       - slack-fail-notify
       - slack-pass-notify
             
-
   deploy-frontend:
     docker:
-      - image: amazon/aws-cli
+      - image: circleci/node:13.8.0
+#      - image: amazon/aws-cli
     steps:
-      - aws_dependencies
       - checkout
       - restore_cache:
           keys: [frontend-build]
       - run:
+          name: Install awscli
+          command: |
+            pip3 install awscli
+      - run:
           name: Get backend url
           command: |
+            pwd
             touch ec2ipaddy
-            export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:project,Values=udapeople-backend" --output text)
+            export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instan    ces[*].PublicIpAddress' --filters "Name=tag:project,Values=udapeople-backend" --output tex    t)
             export API_URL=http://$BACKEND_IP:3030
             echo $API_URL
             echo $BACKEND_IP
@@ -294,7 +298,36 @@ jobs:
      #- rollback_infra_stacks
       - slack-fail-notify
       - slack-pass-notify
-                    
+
+#  deploy-frontend:
+#    docker:
+#      - image: amazon/aws-cli
+#    steps:
+#      - aws_dependencies
+#      - checkout
+#      - restore_cache:
+#          keys: [frontend-build]
+#      - run:
+#          name: Get backend url
+#          command: |
+#            touch ec2ipaddy
+#            export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:project,Values=udapeople-backend" --output text)
+#            export API_URL=http://$BACKEND_IP:3030
+#            echo $API_URL
+#            echo $BACKEND_IP
+#      - run:
+#          name: Deploy frontend objects
+#          command: |
+#            pwd
+#            cd frontend
+#            npm i
+#            npm run build
+#            aws s3 cp ./dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7}/ --recursive
+#     # Here's where you will add some code to rollback on failure      
+#     #- rollback_infra_stacks
+#      - slack-fail-notify
+#      - slack-pass-notify
+#                    
 #  deploy-backend:
 #    docker:
 #      # Docker image here that supports Ansible
