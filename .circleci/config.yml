@@ -295,57 +295,32 @@ jobs:
             npm i
             npm run build
             aws s3 cp ./dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7}/ --recursive
-     # Here's where you will add some code to rollback on failure       
-     #- rollback_infra_stacks
+      
+      - rollback_infra_stacks
       - slack-fail-notify
       - slack-pass-notify
 
-#  deploy-frontend:
-#    docker:
-#      - image: amazon/aws-cli
-#    steps:
-#      - aws_dependencies
-#      - checkout
-#      - restore_cache:
-#          keys: [frontend-build]
-#      - run:
-#          name: Get backend url
-#          command: |
-#            touch ec2ipaddy
-#            export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:project,Values=udapeople-backend" --output text)
-#            export API_URL=http://$BACKEND_IP:3030
-#            echo $API_URL
-#            echo $BACKEND_IP
-#      - run:
-#          name: Deploy frontend objects
-#          command: |
-#            pwd
-#            cd frontend
-#            npm i
-#            npm run build
-#            aws s3 cp ./dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7}/ --recursive
-#     # Here's where you will add some code to rollback on failure      
-#     #- rollback_infra_stacks
-#      - slack-fail-notify
-#      - slack-pass-notify
-#                    
-#  deploy-backend:
-#    docker:
-#      # Docker image here that supports Ansible
-#    steps:
-#      # Checkout code from git
-#      # Add ssh keys with fingerprint
-#      # attach workspace
-#      - run:
-#          name: Install dependencies
-#          command: |
-#            # your code here
-#      - run:
-#          name: Deploy backend
-#          command: |
-#            # your code here
-#      # Here's where you will add some code to rollback on failure  
-#
+  deploy-backend:
+    docker:
+      - image: cimg/python:3.9.0
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints: ["b4:f5:d1:d2:18:51:66:f6:39:d4:09:da:af:00:2e:82"]
+      - attach_workspace:
+          at: ~/project/.circleci/ansible
+      - run:
+          name: Deploy backend
+          command: |
+            #cd /home/circleci/
+            cd /home/circleci/project/.circleci/ansible
+            #python -m pip install --user ansible
+            ansible-playbook deploy_backend.yml
+      # Here's where you will add some code to rollback on failure  
+      #- rollback_infra_stacks
+      - slack-fail-notify
+      - slack-pass-notify
+
 #  smoke-test:
 #    docker:
 #      # Lightweight Docker image 
