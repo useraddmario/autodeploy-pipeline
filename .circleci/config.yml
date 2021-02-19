@@ -429,7 +429,7 @@ workflows:
             - aws
             - slack
       - deploy-backend:
-          requires: [run-migrations]
+          requires: [deploy-frontend]
           context:
             - aws
             - slack
