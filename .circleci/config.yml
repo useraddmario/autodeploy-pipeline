@@ -76,7 +76,6 @@ jobs:
           paths: [frontend/node_modules]
           key: frontend-build
       - slack-fail-notify
-      - slack-pass-notify
 
   build-backend:
     docker:
@@ -95,7 +94,6 @@ jobs:
           paths: [backend/node_modules]
           key: backend-build
       - slack-fail-notify
-      - slack-pass-notify
 
   test-frontend:
     docker:
@@ -111,7 +109,6 @@ jobs:
             npm i
             npm test
       - slack-fail-notify
-      - slack-pass-notify
 
   test-backend:
     docker:
@@ -127,7 +124,6 @@ jobs:
             npm i
             npm test
       - slack-fail-notify
-      - slack-pass-notify
             
   scan-frontend:
     docker:
@@ -143,7 +139,6 @@ jobs:
             npm i
             npm audit --audit-level=critical
       - slack-fail-notify
-      - slack-pass-notify
 
   scan-backend:
     docker:
@@ -159,7 +154,6 @@ jobs:
             npm i
             npm audit fix --audit-level=critical --force
       - slack-fail-notify
-      - slack-pass-notify
 
   deploy-infrastructure:
     docker:
@@ -227,7 +221,6 @@ jobs:
             #- project
       - rollback_infra_stacks
       - slack-fail-notify
-      - slack-pass-notify
 
   run-migrations:
     docker:
@@ -263,7 +256,6 @@ jobs:
               
       - rollback_infra_stacks
       - slack-fail-notify
-      - slack-pass-notify
             
   deploy-frontend:
     docker:
@@ -298,7 +290,6 @@ jobs:
       
       - rollback_infra_stacks
       - slack-fail-notify
-      - slack-pass-notify
 
   deploy-backend:
     docker:
@@ -437,8 +428,11 @@ workflows:
           context:
             - aws
             - slack
-       #- deploy-backend:
-      #    requires: [run-migrations]
+      - deploy-backend:
+          requires: [run-migrations]
+          context:
+            - aws
+            - slack
       #- smoke-test:
       #    requires: [deploy-backend, deploy-frontend]
       #- cloudfront-update:
