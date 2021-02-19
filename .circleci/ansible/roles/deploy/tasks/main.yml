@@ -10,4 +10,4 @@
 - name: "Start backend in pm2"
   shell: |
     cd /home/circleci/backend
-  pm2 start npm -- run start
+    pm2 start npm -- run start
