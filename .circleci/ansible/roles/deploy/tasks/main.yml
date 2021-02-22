@@ -5,8 +5,8 @@
     state: directory
 - name: "Copy backend files"
   copy:
-    src: /home/circleci/backend
-    dest: /home/circleci
+    src: /home/circleci/project/backend
+    dest: /home/circleci/backend
 - name: "Start backend in pm2"
   shell: |
     cd /home/circleci/backend
