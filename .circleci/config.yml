@@ -253,6 +253,9 @@ jobs:
             else
                 curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" --request PUT --data "false" https://api.memstash.io/values/<< pipeline.id >>_migrations
             fi
+      - save_cache:
+          paths: [backend/node_modules]
+          key: backend-build
               
       - rollback_infra_stacks
       - slack-fail-notify
@@ -296,6 +299,8 @@ jobs:
       - image: cimg/python:3.9.0
     steps:
       - checkout
+      - restore_cache:
+          keys: [backend-build]
       - add_ssh_keys:
           fingerprints: ["b4:f5:d1:d2:18:51:66:f6:39:d4:09:da:af:00:2e:82"]
       - attach_workspace:
