@@ -278,7 +278,7 @@ jobs:
           command: |
             pwd
             touch ec2ipaddy
-            export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instan    ces[*].PublicIpAddress' --filters "Name=tag:project,Values=udapeople-backend" --output tex    t)
+            export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instan    ces[*].PublicIpAddress' --filters "Name=tag:project,Values=udapeople-backend" --output text)
             export API_URL=http://$BACKEND_IP:3030
             echo $API_URL
             echo $BACKEND_IP
@@ -325,16 +325,16 @@ jobs:
     steps:
       - aws_dependencies
       - checkout
-      - restore_cache:
-          keys: [backend-build]
+      - attach_workspace:
+          at: project/.circleci/ansible
       - run:
           name: Install dependencies
           command: |
-            apt install curl
+            yum -y install curl
       - run:
           name: Get backend url
           command: |
-            exit 0      
+            cat project/.circleci/ansible/inventory
       - run:
           name: Backend smoke test.
           command: |
