@@ -1,12 +1,16 @@
 ---
-- name: "Create backend directory"
-  file:
-    path: /home/circleci/backend
-    state: directory
-- name: "Copy backend files"
-  copy:
-    src: /home/circleci/project/backend
-    dest: /home/circleci/backend
+#- name: "Create backend directory"
+#  file:
+#    path: /home/circleci/backend
+#    state: directory
+#- name: "Copy backend files"
+#  copy:
+#    src: backend.tgz
+#    dest: /home/circleci
+- name: "Move and expand backend archive"
+  ansible.builtin.unarchive:
+    src: backend.tgz
+    dest: /home/circleci
 - name: "Start backend in pm2"
   shell: |
     cd /home/circleci/backend

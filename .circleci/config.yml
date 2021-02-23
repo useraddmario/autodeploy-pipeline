@@ -308,6 +308,9 @@ jobs:
       - run:
           name: Deploy backend
           command: |
+            cd /home/circleci/project
+            tar cvfz backend.tgz /home/circleci/project/backend
+            mv backend.tgz /home/circleci/project/.circleci/ansible/roles/deploy/files
             cd /home/circleci/project/.circleci/ansible
             python -m pip install --user ansible
             ansible-playbook deploy_backend.yml
