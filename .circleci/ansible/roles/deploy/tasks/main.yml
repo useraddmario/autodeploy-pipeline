@@ -10,7 +10,7 @@
 - name: "Move and expand backend archive"
   ansible.builtin.unarchive:
     src: backend.tgz
-    dest: /home/circleci
+    dest: /home/ubuntu/
 - name: "Start backend in pm2"
   shell: |
     cd /home/circleci/backend
