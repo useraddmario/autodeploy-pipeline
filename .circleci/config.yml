@@ -334,8 +334,8 @@ jobs:
       - run:
           name: Get backend url
           command: |
-            export BACKEND_IP=$(tail -n 1 project/.circleci/ansible/inventory)
-            export API_URL=http://$BACKEND_IP:3030
+            export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instan    ces[*].PublicIpAddress' --filters "Name=tag:project,Values=udapeople-backend" --output text)
+            export API_URL=http://$BACKEND_IP:3030/api/status
             echo $API_URL
             echo $BACKEND_IP
       - run:
