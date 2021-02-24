@@ -325,8 +325,6 @@ jobs:
     steps:
       - aws_dependencies
       - checkout
-      - attach_workspace:
-          at: ~/project/.circleci/ansible
       - run:
           name: Install dependencies
           command: |
@@ -334,7 +332,7 @@ jobs:
       - run:
           name: Get backend url
           command: |
-            export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instan    ces[*].PublicIpAddress' --filters "Name=tag:project,Values=udapeople-backend" --output text)
+            export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:project,Values=udapeople-backend" --output text)
             export API_URL=http://$BACKEND_IP:3030/api/status
             echo $API_URL
             echo $BACKEND_IP
