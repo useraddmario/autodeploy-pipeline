@@ -341,11 +341,12 @@ jobs:
       - run:
           name: Backend smoke test.
           command: |
+            echo $API_URL
             if curl $API_URL | grep "Welcome"
             then
-              return 1
+              exit 1
             else
-              return 0
+              exit 0
             fi
       - run:
           name: Frontend smoke test.
