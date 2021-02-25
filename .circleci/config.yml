@@ -299,8 +299,8 @@ jobs:
       - image: cimg/python:3.9.0
     steps:
       - checkout
-        #- restore_cache:
-        #  keys: [backend-build]
+        - restore_cache:
+          keys: [backend-build]
       - add_ssh_keys:
           fingerprints: ["b4:f5:d1:d2:18:51:66:f6:39:d4:09:da:af:00:2e:82"]
       - attach_workspace:

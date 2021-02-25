@@ -8,3 +8,6 @@
     become: no
     cd /home/ubuntu/backend
     pm2 start npm --name "udabackend" -- start
+- name: "Pause for app to startup"
+  pause:
+    minutes: 3
