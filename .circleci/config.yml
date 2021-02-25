@@ -278,7 +278,7 @@ jobs:
           command: |
             pwd
             touch ec2ipaddy
-            export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instan    ces[*].PublicIpAddress' --filters "Name=tag:project,Values=udapeople-backend" --output text)
+            export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:project,Values=udapeople-backend" --output text)
             export API_URL=http://$BACKEND_IP:3030
             echo $API_URL
             echo $BACKEND_IP
@@ -340,7 +340,7 @@ jobs:
           name: Backend smoke test.
           command: |
             echo $API_URL
-            if curl -s "$API_URL" | grep "Welcome"
+            if curl -s "$API_URL" | grep "ok"
             then
               exit 0
             else
@@ -349,7 +349,7 @@ jobs:
       - run:
           name: Frontend smoke test.
           command: |
-            export FRONTEND_URL="http://udapeople-${CIRCLE_WORKFLOW_ID}.s3-website-us-east-1.amazonaws.com"
+            export FRONTEND_URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-us-west-2.amazonaws.com"
             echo $FRONTEND_URL
             if curl -s "$FRONTEND_URL" | grep "Welcome"
             then
