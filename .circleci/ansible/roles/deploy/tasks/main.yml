@@ -13,5 +13,5 @@
     dest: /home/ubuntu/
 - name: "Start backend in pm2"
   shell: |
-    cd /home/circleci/backend
+    cd /home/ubuntu/backend
     pm2 start npm -- run start
