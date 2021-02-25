@@ -16,3 +16,9 @@
     global: yes
     production: yes
     state: present
+
+    #- name: pm2 service start
+    #service:
+    #name: pm2
+    #state: started
+    #enabled: yes

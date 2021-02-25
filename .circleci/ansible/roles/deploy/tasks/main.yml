@@ -1,17 +1,10 @@
 ---
-#- name: "Create backend directory"
-#  file:
-#    path: /home/circleci/backend
-#    state: directory
-#- name: "Copy backend files"
-#  copy:
-#    src: backend.tgz
-#    dest: /home/circleci
 - name: "Move and expand backend archive"
   ansible.builtin.unarchive:
     src: backend.tgz
     dest: /home/ubuntu/
 - name: "Start backend in pm2"
   shell: |
+    become: no
     cd /home/ubuntu/backend
     pm2 start npm --name "udabackend" -- start
