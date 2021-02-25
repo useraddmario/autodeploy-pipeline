@@ -3,11 +3,11 @@
   ansible.builtin.unarchive:
     src: backend.tgz
     dest: /home/ubuntu/
-- name: "Start backend in pm2"
-  shell: |
-    become: no
-    cd /home/ubuntu/backend
-    pm2 start npm --name "udabackend" -- start
+- name: "start backend in pm2"
+  become: false
+  command: pm2 start npm --name "udabackend" -- run start
+  args:
+    chdir: /home/ubuntu/backend
 - name: "Pause for app to startup"
   pause:
     minutes: 3
