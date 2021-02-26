@@ -3,10 +3,16 @@
   ansible.builtin.unarchive:
     src: backend.tgz
     dest: /home/ubuntu/
+    owner: ubuntu
 - name: "install npm"
   shell: |
     cd /home/ubuntu/backend
     npm i
+- name: "configure pm2 service"
+  become: yes
+  shell: |
+    env PATH=$PATH:/usr/local/bin pm2 startup -u ubuntu
+
 - name: "start backend in pm2"
   become: false
   command: pm2 start npm --name "udabackend" -- run start
