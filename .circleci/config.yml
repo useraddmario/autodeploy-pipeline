@@ -319,33 +319,32 @@ jobs:
       - slack-fail-notify
       - slack-pass-notify
 
-  smoke-test:
+  backend-smoke-test:
     docker:
       - image: amazon/aws-cli
     steps:
       - aws_dependencies
       - checkout
       - run:
-          name: Install dependencies
-          command: |
-            yum -y install curl
-      - run:
-          name: Get backend url
+          name: Backend smoke test
           command: |
             export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:project,Values=udapeople-backend" --output text)
             export API_URL=http://$BACKEND_IP:3030/api/status
             echo $API_URL
             echo $BACKEND_IP
-      - run:
-          name: Backend smoke test.
-          command: |
-            echo $API_URL
+            #Backend smoke test
             if curl -s "$API_URL" | grep "ok"
             then
               exit 0
             else
               exit 1
             fi
+  frontend-smoke-test:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - aws_dependencies
+      - checkout
       - run:
           name: Frontend smoke test.
           command: |
@@ -457,7 +456,12 @@ workflows:
           context:
             - aws
             - slack
-      - smoke-test:
+      - backend-smoke-test:
+          requires: [deploy-backend, deploy-frontend]
+          context:
+            - aws
+            - slack
+      - frontend-smoke-test:
           requires: [deploy-backend, deploy-frontend]
           context:
             - aws
