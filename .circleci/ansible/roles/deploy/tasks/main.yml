@@ -4,7 +4,7 @@
     src: backend.tgz
     dest: /home/ubuntu/
     owner: ubuntu
-- name: "install npm and build"
+- name: "install npm install"
   shell: |
     cd /home/ubuntu/backend
     npm i
@@ -17,7 +17,7 @@
   become: false
   command: pm2 start npm --name "udabackend" -- run start
   args:
-    chdir: /home/ubuntu/backend/dist
+    chdir: /home/ubuntu/backend
 - name: "Pause for app to startup"
   pause:
     minutes: 5
