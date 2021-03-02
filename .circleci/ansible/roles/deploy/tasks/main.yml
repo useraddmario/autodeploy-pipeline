@@ -6,7 +6,7 @@
     owner: ubuntu
 - name: "install npm and build"
   shell: |
-    cd /home/ubuntu/backend
+    cd /home/ubuntu/dist
     npm i
 - name: "configure pm2 service"
   become: yes

@@ -231,8 +231,8 @@ jobs:
       - checkout
       - restore_cache:
           keys: [backend-build]
-      - attach_workspace:
-          at: ./backend
+          #- attach_workspace:
+          #at: ./backend
       - run:
           name: Run migrations
           command: |
@@ -253,9 +253,9 @@ jobs:
             else
                 curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" --request PUT --data "false" https://api.memstash.io/values/<< pipeline.id >>_migrations
             fi
-      - save_cache:
-          paths: [backend/node_modules]
-          key: backend-build
+            #- save_cache:
+            #paths: [backend/node_modules]
+            #key: backend-build
               
       - rollback_infra_stacks
       - slack-fail-notify
