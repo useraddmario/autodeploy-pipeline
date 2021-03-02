@@ -313,7 +313,7 @@ jobs:
             echo ENVIRONMENT=production >> ".env"
             echo TYPEORM_CONNECTION=postgres >> ".env"
             echo TYPEORM_MIGRATIONS_DIR=./src/migrations >> ".env"
-            echo TYPEORM_ENTITIES=./dist/modules/domain/*/*/*.entity\{.ts,.js\}>> ".env"
+            echo TYPEORM_ENTITIES=./dist/modules/domain/*/*/*.entity.js >> ".env"
             echo TYPEORM_MIGRATIONS=./migrations/*.ts >> ".env"
             echo TYPEORM_HOST=$TYPEORM_HOST >> ".env"
             echo TYPEORM_PORT=$TYPEORM_PORT >> ".env"
