@@ -6,7 +6,7 @@
     owner: ubuntu
 - name: "install npm and build"
   shell: |
-    cd /home/ubuntu/dist
+    cd /home/ubuntu/backend
     npm i
 - name: "configure pm2 service"
   become: yes
@@ -17,7 +17,7 @@
   become: false
   command: pm2 start npm --name "udabackend" -- run start
   args:
-    chdir: /home/ubuntu/dist
+    chdir: /home/ubuntu/backend
 - name: "Pause for app to startup"
   pause:
     minutes: 5
