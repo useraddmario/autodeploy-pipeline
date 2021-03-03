@@ -70,6 +70,9 @@ jobs:
             cd frontend
             npm i
             npm run build
+      - save_cache:
+          paths: [frontend/node_modules]
+          key: frontend-${CIRCLE_WORKFLOW_ID:0:7}
       - slack-fail-notify
 
   build-backend:
@@ -97,6 +100,9 @@ jobs:
           root: /tmp
           paths: 
             - backend.tgz
+      - save_cache:
+          paths: [backend/node_modules]
+          key: backend-${CIRCLE_WORKFLOW_ID:0:7}
       - slack-fail-notify
 
   test-frontend:
@@ -104,12 +110,14 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - frontend-${CIRCLE_WORKFLOW_ID:0"7}
       - run:
           name: Front-end test
           command: |
             cd frontend
             npm i
-            npm run build
             npm test
       - slack-fail-notify
 
@@ -118,6 +126,9 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - backend-${CIRCLE_WORKFLOW_ID:0"7}
       - run:
           name: Back-end test
           command: |
@@ -131,6 +142,9 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - frontend-${CIRCLE_WORKFLOW_ID:0"7}
       - run:
           name: Front-end audit
           command: |
@@ -144,6 +158,9 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - backend-${CIRCLE_WORKFLOW_ID:0"7}
       - run:
           name: Back-end audit
           command: |
@@ -215,13 +232,15 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - backend-${CIRCLE_WORKFLOW_ID:0"7}
       - run:
           name: Run migrations
           command: |
             cd backend
             touch dbmigration
             npm i
-            npm run build
             npm run migrations >> dbmigration
       - run:
           name: Send migration results to memstash
