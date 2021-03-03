@@ -4,19 +4,15 @@
     src: backend.tgz
     dest: /home/ubuntu/
     owner: ubuntu
+- name: "configure pm2 service"
+  shell: |
+    env PATH=$PATH:/usr/local/bin pm2 startup -u ubuntu
 - name: "install npm install"
   shell: |
     cd /home/ubuntu/backend
-    npm install
-    npm run build
-- name: "configure pm2 service"
-  become: yes
-  shell: |
-    env PATH=$PATH:/usr/local/bin pm2 startup -u ubuntu
-
+    npm i
 - name: "start backend in pm2"
-  become: false
-  command: pm2 start npm --name udabackend -- start
+  command: pm2 start main.js --name udabackend
   args:
     chdir: /home/ubuntu/backend
 - name: "Pause for app to startup"

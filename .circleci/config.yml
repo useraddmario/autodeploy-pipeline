@@ -64,17 +64,12 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - checkout
-      - restore_cache:
-          keys: [v1-frontend-build]
       - run:
           name: Build front-end
           command: |
             cd frontend
             npm i
             npm run build
-      - save_cache:
-          paths: [frontend/node_modules]
-          key: v1-frontend-build
       - slack-fail-notify
 
   build-backend:
@@ -82,17 +77,26 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - checkout
-      - restore_cache:
-          keys: [v3-backend-build]
       - run:
           name: Back-end build
           command: |
-            cd backend
+            cd /home/circleci/project/backend
             npm i
             npm run build
-      - save_cache:
-          paths: [backend]
-          key: v3-backend-build
+      - run:
+          name: Save backend build
+          command: |
+            mkdir /tmp/backend
+            cd /home/circleci/project/backend
+            cp -a package.json /tmp/backend
+            cd dist
+            cp -Ra ./* /tmp/backend
+            cd /tmp
+            tar cvfz /tmp/backend.tgz backend
+      - persist_to_workspace:
+          root: /tmp
+          paths: 
+            - backend.tgz
       - slack-fail-notify
 
   test-frontend:
@@ -100,8 +104,6 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - checkout
-      - restore_cache:
-          keys: [v1-frontend-build]
       - run:
           name: Front-end test
           command: |
@@ -115,8 +117,6 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - checkout
-      - restore_cache:
-          keys: [v3-backend-build]
       - run:
           name: Back-end test
           command: |
@@ -130,8 +130,6 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - checkout
-      - restore_cache:
-          keys: [v1-frontend-build]
       - run:
           name: Front-end audit
           command: |
@@ -145,8 +143,6 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - checkout
-      - restore_cache:
-          keys: [v3-backend-build]
       - run:
           name: Back-end audit
           command: |
@@ -161,8 +157,6 @@ jobs:
     steps:
       - aws_dependencies
       - checkout
-      - restore_cache:
-          keys: [v1-frontend-build]
       - run:
           name: Ensure back-end infrastructure exists
           command: |
@@ -202,41 +196,27 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: ~/project/.circleci/ansible
+          at: /tmp/backend
       - add_ssh_keys:
           fingerprints: ["b4:f5:d1:d2:18:51:66:f6:39:d4:09:da:af:00:2e:82"]
       - run:
           name: "Ansible control server install and playbook run"
           command: |
-            cd /home/circleci/
-            #            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-            #sudo unzip awscliv2.zip
-            #sudo bash ./aws/install
+            cp -a /tmp/backend/inventory /home/circleci/project/.circleci/ansible/
             cd /home/circleci/project/.circleci/ansible
             python -m pip install --user ansible
             ansible-playbook configure_server.yml
-            #  - persist_to_workspace:
-            #root: /home/circleci
-            #paths:
-            #- project
       - rollback_infra_stacks
       - slack-fail-notify
 
   run-migrations:
     docker:
-      # Docker image here that supports NodeJS
       - image: circleci/node:13.8.0
     steps:
-      # Checkout code from git
       - checkout
-      - restore_cache:
-          keys: [v3-backend-build]
-          #- attach_workspace:
-          #at: ./backend
       - run:
           name: Run migrations
           command: |
-            # Your code here
             cd backend
             touch dbmigration
             npm i
@@ -245,7 +225,6 @@ jobs:
       - run:
           name: Send migration results to memstash
           command: |
-            # Your code here
             cd backend
             if grep -q "has been executed successfully" dbmigrations
             then
@@ -253,9 +232,6 @@ jobs:
             else
                 curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" --request PUT --data "false" https://api.memstash.io/values/<< pipeline.id >>_migrations
             fi
-            #- save_cache:
-            #paths: [backend/node_modules]
-            #key: v3-backend-build
               
       - rollback_infra_stacks
       - slack-fail-notify
@@ -263,11 +239,8 @@ jobs:
   deploy-frontend:
     docker:
       - image: circleci/node:13.8.0
-#      - image: amazon/aws-cli
     steps:
       - checkout
-      - restore_cache:
-          keys: [v1-frontend-build]
       - run:
           name: Install awscli
           command: |
@@ -299,35 +272,32 @@ jobs:
       - image: cimg/python:3.9.0
     steps:
       - checkout
-      - restore_cache:
-          keys: [v3-backend-build]
       - add_ssh_keys:
           fingerprints: ["b4:f5:d1:d2:18:51:66:f6:39:d4:09:da:af:00:2e:82"]
       - attach_workspace:
-          at: ~/project/.circleci/ansible
+          at: /tmp/backend
       - run:
           name: Deploy backend
           command: |
+            cp -a /tmp/backend/inventory /home/circleci/project/.circleci/ansible/
             cd /home/circleci/project/backend
             touch .env
             echo ENVIRONMENT=production >> ".env"
             echo NODE_ENV=production >> ".env"
             echo TYPEORM_CONNECTION=postgres >> ".env"
-            echo TYPEORM_MIGRATIONS_DIR=./dist/migrations >> ".env"
-            echo TYPEORM_ENTITIES=./dist/modules/domain/**/*.entity\{.ts,.js\} >> ".env"
-            echo TYPEORM_MIGRATIONS=./dist/migrations/*.ts >> ".env"
+            echo TYPEORM_MIGRATIONS_DIR=./migrations >> ".env"
+            echo TYPEORM_ENTITIES=./modules/domain/**/*.entity\{.ts,.js\} >> ".env"
+            echo TYPEORM_MIGRATIONS=./migrations/*.ts >> ".env"
             echo TYPEORM_HOST=$TYPEORM_HOST >> ".env"
             echo TYPEORM_PORT=$TYPEORM_PORT >> ".env"
             echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> ".env"
             echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> ".env"
             echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> ".env"
             cd /home/circleci/project
-            tar cvfz backend.tgz backend
-            mv backend.tgz /home/circleci/project/.circleci/ansible/roles/deploy/files/
+            cp /tmp/backend/backend.tgz /home/circleci/project/.circleci/ansible/roles/deploy/files/
             cd /home/circleci/project/.circleci/ansible
             python -m pip install --user ansible
             ansible-playbook deploy_backend.yml
-      # Here's where you will add some code to rollback on failure  
       #- rollback_infra_stacks
       - slack-fail-notify
       - slack-pass-notify
@@ -345,7 +315,6 @@ jobs:
             export API_URL=http://$BACKEND_IP:3030/api/status
             echo $API_URL
             echo $BACKEND_IP
-            #Backend smoke test
             if curl -s "$API_URL" | grep "ok"
             then
               exit 0
