@@ -116,7 +116,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - frontend-${CIRCLE_WORKFLOW_ID:0"7}
+            - frontend-${CIRCLE_WORKFLOW_ID:0:7}
       - run:
           name: Front-end test
           command: |
@@ -148,7 +148,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - frontend-${CIRCLE_WORKFLOW_ID:0"7}
+            - frontend-${CIRCLE_WORKFLOW_ID:0:7}
       - run:
           name: Front-end audit
           command: |
@@ -164,7 +164,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - backend-${CIRCLE_WORKFLOW_ID:0"7}
+            - backend-${CIRCLE_WORKFLOW_ID:0:7}
       - run:
           name: Back-end audit
           command: |
@@ -238,7 +238,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - backend-${CIRCLE_WORKFLOW_ID:0"7}
+            - backend-${CIRCLE_WORKFLOW_ID:0:7}
       - run:
           name: Run migrations
           command: |
