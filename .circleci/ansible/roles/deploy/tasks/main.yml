@@ -4,6 +4,15 @@
     src: backend.tgz
     dest: /home/ubuntu/
     owner: ubuntu
+    group: ubuntu
+
+- name: "Move .env file to remote system"
+  ansible.builtin.copy:
+    src: .env
+    dest: /home/ubuntu/backend
+    owner: ubuntu
+    group: ubuntu
+    mode: '0644'
 - name: "configure pm2 service"
   shell: |
     env PATH=$PATH:/usr/local/bin pm2 startup -u ubuntu
@@ -12,6 +21,7 @@
     cd /home/ubuntu/backend
     npm i
 - name: "start backend in pm2"
+  become: false
   command: pm2 start main.js --name udabackend
   args:
     chdir: /home/ubuntu/backend
