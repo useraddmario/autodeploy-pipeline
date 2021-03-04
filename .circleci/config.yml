@@ -5,7 +5,7 @@ commands:
   fail-switch:
     steps:
       - run:
-          name: Deployment failure switch
+          name: Troubleshooting dev failure switch
           command: |
             exit 1
   
@@ -30,17 +30,6 @@ commands:
           event: pass
           template: success_tagged_deploy_1
 
-  rollback-infra-stacks:
-    steps:
-      - run:
-          name: Rollback Infra
-          command: |
-            aws cloudformation delete-stack --stack-name "frontend-${CIRCLE_WORKFLOW_ID:0:7}" 
-            aws cloudformation wait stack-delete-complete --stack-name "frontend-${CIRCLE_WORKFLOW_ID:0:7}" 
-            aws cloudformation delete-stack --stack-name "backend-${CIRCLE_WORKFLOW_ID:0:7}" 
-            aws cloudformation wait stack-delete-complete --stack-name "backend-${CIRCLE_WORKFLOW_ID:0:7}" 
-          when: on_fail
-  
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
     steps:
@@ -63,8 +52,10 @@ commands:
           name: Remove S3 artifacts for failed deployment
           command: |
             aws s3 rb s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --force
-      - revert-migrations
-      - rollback-infra-stacks 
+            aws cloudformation delete-stack --stack-name "frontend-${CIRCLE_WORKFLOW_ID:0:7}" 
+            aws cloudformation wait stack-delete-complete --stack-name "frontend-${CIRCLE_WORKFLOW_ID:0:7}" 
+            aws cloudformation delete-stack --stack-name "backend-${CIRCLE_WORKFLOW_ID:0:7}" 
+            aws cloudformation wait stack-delete-complete --stack-name "backend-${CIRCLE_WORKFLOW_ID:0:7}" 
           when: on_fail
   
             
@@ -218,9 +209,8 @@ jobs:
           root: ~/project/.circleci/ansible/
           paths:
             - inventory
-      - rollback-infra-stacks 
+      - destroy-environment 
       - slack-fail-notify
-      - slack-pass-notify
 
   configure-infrastructure:
     docker:
@@ -238,7 +228,7 @@ jobs:
             cd /home/circleci/project/.circleci/ansible
             python -m pip install --user ansible
             ansible-playbook configure_server.yml
-      - rollback-infra-stacks
+      - destroy-environment
       - slack-fail-notify
 
   run-migrations:
@@ -267,7 +257,7 @@ jobs:
                 curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" --request PUT --data "false" https://api.memstash.io/values/<< pipeline.id >>_migrations
             fi
       - revert_migrations        
-      - rollback-infra-stacks
+      - destroy-environment
       - slack-fail-notify
             
   deploy-frontend:
@@ -297,6 +287,7 @@ jobs:
             npm i
             npm run build
             aws s3 cp ./dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7}/ --recursive
+      - revert_migrations        
       - destroy-environment
       - slack-fail-notify
 
@@ -330,6 +321,7 @@ jobs:
             cd /home/circleci/project/.circleci/ansible
             python -m pip install --user ansible
             ansible-playbook deploy_backend.yml
+      - revert_migrations        
       - destroy-environment
       - slack-fail-notify
 
@@ -352,7 +344,9 @@ jobs:
             else
               exit 1
             fi
+      - revert_migrations        
       - destroy-environment
+      - slack-fail-notify
       - slack-pass-notify
   frontend-smoke-test:
     docker:
@@ -371,7 +365,9 @@ jobs:
             else
               exit 1
             fi
+      - revert_migrations        
       - destroy-environment
+      - slack-fail-notify
       - slack-pass-notify
       - fail-switch
 
