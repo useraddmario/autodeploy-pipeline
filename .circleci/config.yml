@@ -256,7 +256,7 @@ jobs:
             else
                 curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" --request PUT --data "false" https://api.memstash.io/values/<< pipeline.id >>_migrations
             fi
-      - revert_migrations        
+      - revert-migrations        
       - destroy-environment
       - slack-fail-notify
             
@@ -287,7 +287,7 @@ jobs:
             npm i
             npm run build
             aws s3 cp ./dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7}/ --recursive
-      - revert_migrations        
+      - revert-migrations        
       - destroy-environment
       - slack-fail-notify
 
@@ -321,7 +321,7 @@ jobs:
             cd /home/circleci/project/.circleci/ansible
             python -m pip install --user ansible
             ansible-playbook deploy_backend.yml
-      - revert_migrations        
+      - revert-migrations        
       - destroy-environment
       - slack-fail-notify
 
@@ -344,7 +344,7 @@ jobs:
             else
               exit 1
             fi
-      - revert_migrations        
+      - revert-migrations        
       - destroy-environment
       - slack-fail-notify
       - slack-pass-notify
@@ -365,7 +365,7 @@ jobs:
             else
               exit 1
             fi
-      - revert_migrations        
+      - revert-migrations        
       - destroy-environment
       - slack-fail-notify
       - slack-pass-notify
