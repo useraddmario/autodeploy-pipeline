@@ -2,14 +2,14 @@ version: 2.1
 orbs:
   slack: circleci/slack@4.1.1
 commands:
-  fail_switch:
+  fail-switch:
     steps:
       - run:
           name: Deployment failure switch
           command: |
             exit 1
   
-  aws_dependencies:
+  aws-dependencies:
     steps:
       - run:
           name: Install dependencies for AWS Linux 2
@@ -30,7 +30,7 @@ commands:
           event: pass
           template: success_tagged_deploy_1
 
-  rollback_infra_stacks:
+  rollback-infra-stacks:
     steps:
       - run:
           name: Rollback Infra
@@ -64,7 +64,7 @@ commands:
           command: |
             aws s3 rb s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --force
       - revert-migrations
-      - rollback_infra_stacks 
+      - rollback-infra-stacks 
           when: on_fail
   
             
@@ -187,7 +187,7 @@ jobs:
     docker:
       - image: amazon/aws-cli
     steps:
-      - aws_dependencies
+      - aws-dependencies
       - checkout
       - run:
           name: Ensure back-end infrastructure exists
@@ -218,7 +218,7 @@ jobs:
           root: ~/project/.circleci/ansible/
           paths:
             - inventory
-      - rollback_infra_stacks 
+      - rollback-infra-stacks 
       - slack-fail-notify
       - slack-pass-notify
 
@@ -238,7 +238,7 @@ jobs:
             cd /home/circleci/project/.circleci/ansible
             python -m pip install --user ansible
             ansible-playbook configure_server.yml
-      - rollback_infra_stacks
+      - rollback-infra-stacks
       - slack-fail-notify
 
   run-migrations:
@@ -267,7 +267,7 @@ jobs:
                 curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" --request PUT --data "false" https://api.memstash.io/values/<< pipeline.id >>_migrations
             fi
       - revert_migrations        
-      - rollback_infra_stacks
+      - rollback-infra-stacks
       - slack-fail-notify
             
   deploy-frontend:
@@ -337,7 +337,7 @@ jobs:
     docker:
       - image: amazon/aws-cli
     steps:
-      - aws_dependencies
+      - aws-dependencies
       - checkout
       - run:
           name: Backend smoke test
@@ -358,7 +358,7 @@ jobs:
     docker:
       - image: amazon/aws-cli
     steps:
-      - aws_dependencies
+      - aws-dependencies
       - checkout
       - run:
           name: Frontend smoke test.
@@ -373,6 +373,7 @@ jobs:
             fi
       - destroy-environment
       - slack-pass-notify
+      - fail-switch
 
 #  cloudfront-update:
 #    docker:
