@@ -365,11 +365,11 @@ jobs:
             else
               exit 1
             fi
+      - fail-switch
       - revert-migrations        
       - destroy-environment
       - slack-fail-notify
       - slack-pass-notify
-      - fail-switch
 
 #  cloudfront-update:
 #    docker:
