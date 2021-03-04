@@ -2,28 +2,19 @@ version: 2.1
 orbs:
   slack: circleci/slack@4.1.1
 commands:
-  rollback_infra_stacks:
-    steps:
-      - run:
-          name: Rollback Infra
-          command: |
-            aws cloudformation delete-stack --stack-name "frontend-${CIRCLE_WORKFLOW_ID:0:7}" 
-            aws cloudformation wait stack-delete-complete --stack-name "frontend-${CIRCLE_WORKFLOW_ID:0:7}" 
-            aws cloudformation delete-stack --stack-name "backend-${CIRCLE_WORKFLOW_ID:0:7}" 
-            aws cloudformation wait stack-delete-complete --stack-name "backend-${CIRCLE_WORKFLOW_ID:0:7}" 
-          when: on_fail
-  aws_dependencies:
-    steps:
-      - run:
-          name: Install dependencies for AWS Linux 2
-          command: |
-            yum -y install jq tar less gzip
   fail_switch:
     steps:
       - run:
           name: Deployment failure switch
           command: |
             exit 1
+  
+  aws_dependencies:
+    steps:
+      - run:
+          name: Install dependencies for AWS Linux 2
+          command: |
+            yum -y install jq tar less gzip
 
   slack-fail-notify:
     description: Alert the slack channel on deployment failure
@@ -39,24 +30,43 @@ commands:
           event: pass
           template: success_tagged_deploy_1
 
+  rollback_infra_stacks:
+    steps:
+      - run:
+          name: Rollback Infra
+          command: |
+            aws cloudformation delete-stack --stack-name "frontend-${CIRCLE_WORKFLOW_ID:0:7}" 
+            aws cloudformation wait stack-delete-complete --stack-name "frontend-${CIRCLE_WORKFLOW_ID:0:7}" 
+            aws cloudformation delete-stack --stack-name "backend-${CIRCLE_WORKFLOW_ID:0:7}" 
+            aws cloudformation wait stack-delete-complete --stack-name "backend-${CIRCLE_WORKFLOW_ID:0:7}" 
+          when: on_fail
+  
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
-    parameters:
-      # Add parameter here     
     steps:
       - run:
           name: Revert migrations
-          # Add when this will run
           command: |
-            # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
-            SUCCESS = 1
-            if(( $SUCCESS==1 )); 
+            migration_check=$(curl -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" --request GET https://api.memstash.io/values/<< pipeline.id >>_migrations)
+            if(( $migration_check==1 )); 
             then
-            #  cd ~/project/backend
-            #  npm install
-            #  Add revert code here. You can find this in the Getting Started section.
-              exit 1
+              cd ~/project/backend
+              npm install
+              npm run migrations:revert
             fi
+          when: on_fail
+  
+  destroy-environment:
+    description: J. Robert Oppenheimer
+    steps:
+      - run: 
+          name: Remove S3 artifacts for failed deployment
+          command: |
+            aws s3 rb s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --force
+      - revert-migrations
+      - rollback_infra_stacks 
+          when: on_fail
+  
             
 jobs:
   build-frontend:
@@ -256,7 +266,7 @@ jobs:
             else
                 curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" --request PUT --data "false" https://api.memstash.io/values/<< pipeline.id >>_migrations
             fi
-              
+      - revert_migrations        
       - rollback_infra_stacks
       - slack-fail-notify
             
@@ -287,8 +297,7 @@ jobs:
             npm i
             npm run build
             aws s3 cp ./dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7}/ --recursive
-      
-      - rollback_infra_stacks
+      - destroy-environment
       - slack-fail-notify
 
   deploy-backend:
@@ -321,9 +330,8 @@ jobs:
             cd /home/circleci/project/.circleci/ansible
             python -m pip install --user ansible
             ansible-playbook deploy_backend.yml
-      #- rollback_infra_stacks
+      - destroy-environment
       - slack-fail-notify
-      - slack-pass-notify
 
   backend-smoke-test:
     docker:
@@ -344,6 +352,8 @@ jobs:
             else
               exit 1
             fi
+      - destroy-environment
+      - slack-pass-notify
   frontend-smoke-test:
     docker:
       - image: amazon/aws-cli
@@ -361,7 +371,8 @@ jobs:
             else
               exit 1
             fi
-      # Here's where you will add some code to rollback on failure  
+      - destroy-environment
+      - slack-pass-notify
 
 #  cloudfront-update:
 #    docker:
