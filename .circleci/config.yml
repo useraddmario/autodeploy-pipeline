@@ -479,5 +479,6 @@ workflows:
             - slack
       - cloudfront-update:
           requires: [frontend-smoke-test, backend-smoke-test]
+          context:
             - aws
             - slack
