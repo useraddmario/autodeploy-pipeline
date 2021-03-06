@@ -375,7 +375,6 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - aws-dependencies
-      - checkout
       - run:
           name: Update cloudfront distribution
           command: |
@@ -383,8 +382,8 @@ jobs:
             export OldWorkflowID=$(aws cloudformation list-exports --query "Exports[?Name=='WorkflowID'].Value" --no-paginate --output text)
             #get stacks names to run a comparison
             export Stacks=$(aws cloudformation list-stacks --query 'StackSummaries[*].StackName' --stack-status-filter CREATE_COMPLETE --no-paginate --output text)
-            echo $OldworkflowID
-            echo $Stacks
+            echo Old Workflow ID: "${OldworkflowID}"
+            echo Stacks: "${Stacks}"
             aws cloudformation deploy \
               --template-file .circleci/files/cloudfront.yml \
               --stack-name udapeople-cloudfront \
@@ -394,15 +393,18 @@ jobs:
       - run:
           name: Delete old stacks
           command: |
-            if [[ "${Stacks[@]}"  =~ "${OldWorkflowID}" ]]
+            if [ -n "${OldWorkflowID}" ] && [[ "${Stacks[@]}"  =~ "${OldWorkflowID}" ]]
             then
+              echo $OldworkflowID
               aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
-              aws cloudformation delete-stack --stack-name "udapeople-backend-${OldWorkflowID}"
-              aws cloudformation delete-stack --stack-name "udapeople-frontend-${OldWorkflowID}"
+              aws cloudformation delete-stack --stack-name "backend-${OldWorkflowID}"
+              aws cloudformation delete-stack --stack-name "frontend-${OldWorkflowID}"
+              #     else
+              #aws s3 rm "s3://udapeople
             fi
-      - destroy-environment
-      - slack-fail-notify
-      - slack-pass-notify
+      #- destroy-environment
+      #- slack-fail-notify
+      #- slack-pass-notify
 
 workflows:
   version: 2
