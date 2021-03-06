@@ -380,7 +380,7 @@ jobs:
           name: Update cloudfront distribution
           command: |
             #Get workflowid for current prod
-            export OldWorkflowID=$(aws cloudformation list-exports --query 'Exports[?Name==`WorkflowID`].Value' --no-paginate --output text)
+            export OldWorkflowID=$(aws cloudformation list-exports --query "Exports[?Name=='WorkflowID'].Value" --no-paginate --output text)
             #get stacks names to run a comparison
             export Stacks=$(aws cloudformation list-stacks --query 'StackSummaries[*].StackName' --stack-status-filter CREATE_COMPLETE --no-paginate --output text)
             echo $OldworkflowID
@@ -388,43 +388,22 @@ jobs:
             aws cloudformation deploy \
               --template-file .circleci/files/cloudfront.yml \
               --stack-name udapeople-cloudfront \
+              --region ${AWS_DEFAULT_REGION} \
               --parameter-overides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" \
               --tags project=udapeople &
-
+      - run:
+          name: Delete old stacks
+          command: |
             if [[ "${Stacks[@]}"  =~ "${OldWorkflowID}" ]]
             then
               aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
               aws cloudformation delete-stack --stack-name "udapeople-backend-${OldWorkflowID}"
               aws cloudformation delete-stack --stack-name "udapeople-frontend-${OldWorkflowID}"
             fi
-      - revert-migrations        
       - destroy-environment
       - slack-fail-notify
       - slack-pass-notify
-              
 
-      # Here's where you will add some code to rollback on failure  
-
-#cleanup:
-#    docker:
-#      # Docker image here
-#    steps:
-#      # Checkout code from git
-#      - run:
-#          name: Get old stack workflow id
-#          command: |
-#            # your code here
-#            export OldWorkflowID="the id here"
-#            export STACKS=[] #put the list of stacks here
-#      - run:
-#          name: Remove old stacks and files
-#          command: |
-#            if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
-#            then
-#              # your code here
-#            fi
-#            
-#
 workflows:
   version: 2
   default:
@@ -498,7 +477,7 @@ workflows:
           context:
             - aws
             - slack
-      #- cloudfront-update:
-      #    requires: [smoke-test]
-      #- cleanup:
-      ##    requires: [cloudfront-update]
+      - cloudfront-update:
+          requires: [frontend-smoke-test, backend-smoke-test]
+            - aws
+            - slack
