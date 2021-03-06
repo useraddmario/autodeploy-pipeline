@@ -375,6 +375,7 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - aws-dependencies
+      - checkout
       - run:
           name: Update cloudfront distribution
           command: |
@@ -396,7 +397,7 @@ jobs:
               aws cloudformation delete-stack --stack-name "backend-${OldWorkflowID}"
               aws cloudformation delete-stack --stack-name "frontend-${OldWorkflowID}"
             fi
-            #- destroy-environment
+      - destroy-environment
       - slack-fail-notify
       - slack-pass-notify
 
