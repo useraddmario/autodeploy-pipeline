@@ -388,17 +388,15 @@ jobs:
               --region ${AWS_DEFAULT_REGION} \
               --parameter-overides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" \
               --tags project=udapeople &
-      - run:
-          name: Delete old stacks
-          command: |
+            
             if [[ "${Stacks[@]}"  =~ "${OldWorkflowID}" ]]
             then
-              echo $OldworkflowID
+              echo $OldWorkflowID
               aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
               aws cloudformation delete-stack --stack-name "backend-${OldWorkflowID}"
               aws cloudformation delete-stack --stack-name "frontend-${OldWorkflowID}"
             fi
-      - destroy-environment
+            #- destroy-environment
       - slack-fail-notify
       - slack-pass-notify
 
