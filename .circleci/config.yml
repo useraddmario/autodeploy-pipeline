@@ -14,7 +14,7 @@ commands:
       - run:
           name: Install dependencies for AWS Linux 2
           command: |
-            yum -y install jq tar less gzip
+            yum -y install jq tar less gzip util-linux
 
   slack-fail-notify:
     description: Alert the slack channel on deployment failure
@@ -380,24 +380,24 @@ jobs:
           name: Update cloudfront distribution
           command: |
             export OldWorkflowID=$(aws cloudformation list-exports --query "Exports[?Name==\`WorkflowID\`].Value" --no-paginate --output text)
-            export Stacks=$(aws cloudformation list-stacks --query 'StackSummaries[*].StackName' --stack-status-filter CREATE_COMPLETE --no-paginate --output text)
+            export Stacks=$(aws cloudformation list-stacks --query 'StackSummaries[*].StackName' --stack-status-filter CREATE_COMPLETE --no-paginate --output text | rev | cut -c -7 | rev)
             echo Old Workflow ID: "${OldWorkflowID}"
             echo Stacks: "${Stacks}"
             aws cloudformation deploy \
               --template-file .circleci/files/cloudfront.yml \
               --stack-name AWSLearnCloudFront \
               --region ${AWS_DEFAULT_REGION} \
-              --parameter-overides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" \
+              --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" \
               --tags project=udapeople &
             
-            if [[ "${Stacks[@]}"  =~ "${OldWorkflowID}" ]]
+            if [[ "${Stacks}" -ne "${OldWorkflowID}" ]]
             then
               echo $OldWorkflowID
               aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
               aws cloudformation delete-stack --stack-name "backend-${OldWorkflowID}"
               aws cloudformation delete-stack --stack-name "frontend-${OldWorkflowID}"
             fi
-      - destroy-environment
+            #- destroy-environment
       - slack-fail-notify
       - slack-pass-notify
 
