@@ -383,14 +383,14 @@ jobs:
             export Stacks=$(aws cloudformation list-stacks --query 'StackSummaries[*].StackName' --stack-status-filter CREATE_COMPLETE --no-paginate --output text | rev | cut -c -7 | rev)
             echo Old Workflow ID: $OldWorkflowID
             echo Stacks: $Stacks
+            cd project
             aws cloudformation deploy \
               --template-file .circleci/files/cloudfront.yml \
               --stack-name AWSLearnCloudFront \
               --region ${AWS_DEFAULT_REGION} \
-              --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" \
-              --tags project=udapeople &
+              --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}"
             
-            if [ $Stacks -ne $OldWorkflowID ]
+            if [ "$Stacks" = "$OldWorkflowID" ]
             then
               echo $OldWorkflowID
               aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
