@@ -278,15 +278,7 @@ jobs:
             export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:project,Values=udapeople-backend" --output text)
             export API_URL=http://$BACKEND_IP:3030
             echo $API_URL
-            echo $BACKEND_IP
-            touch frontend/.env
-            echo $API_URL >> frontend/.env
-      - run:
-          name: Deploy frontend objects
-          command: |
-            pwd
             cd frontend
-            cat .env
             npm i
             npm run build
             aws s3 cp ./dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7}/ --recursive
