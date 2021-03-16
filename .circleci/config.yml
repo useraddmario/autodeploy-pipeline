@@ -283,6 +283,7 @@ jobs:
           name: Deploy frontend objects
           command: |
             pwd
+            echo "${API_URL}" >> "frontend/.env"
             cd frontend
             npm i
             npm run build
