@@ -384,7 +384,7 @@ jobs:
               --region ${AWS_DEFAULT_REGION} \
               --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}"
 
-            aws cloudformation create-invalidation \
+            aws cloudfront create-invalidation \
               --distribution-id E13XBMTKJDW8NV \
               --paths "/*"
             
