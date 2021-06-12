@@ -87,7 +87,7 @@ jobs:
           name: Back-end build
           command: |
             cd /home/circleci/project/backend
-            npm i
+            npm install
             npm run build
       - run:
           name: Save backend build
