@@ -3,7 +3,7 @@
 
 # Node.js app deployment to EC2 using Cloudformation, Ansible, and Prometheus
 
-This project's goal was to produce a CI/CD pipeline that builds/tests/security scans/deploys/smoke test a provided sample Node application as well as the accompanying AWS architecture.  This is one of my larger projects and was a part of the Udacity Cloud DevOps course.
+This project's goal was to produce a CI/CD pipeline that builds/tests/security scans/deploys/smoke test a provided sample Node application as well as the accompanying AWS architecture.  This is one of my larger projects and was a part of the Udacity Cloud DevOps course, which was a lot of fun.
 
 
 ### Automation
