@@ -302,7 +302,6 @@ jobs:
             cd /home/circleci/project/.circleci/ansible/roles/deploy/files/
             touch .env
             echo ENVIRONMENT=production >> ".env"
-            #echo NODE_ENV=production >> ".env"
             echo TYPEORM_CONNECTION=postgres >> ".env"
             echo TYPEORM_MIGRATIONS_DIR=./migrations >> ".env"
             echo TYPEORM_ENTITIES=./modules/domain/**/*.entity\{.ts,.js\} >> ".env"
@@ -391,7 +390,6 @@ jobs:
 
             if [ "$Stacks" != "$OldWorkflowID" ]
             then
-              #aws s3 rb "s3://udapeople-${OldWorkflowID}" --force
               aws cloudformation delete-stack --stack-name "backend-${OldWorkflowID}"
               aws cloudformation delete-stack --stack-name "frontend-${OldWorkflowID}"
             fi
