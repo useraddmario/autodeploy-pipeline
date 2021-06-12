@@ -155,7 +155,7 @@ jobs:
           command: |
             cd frontend
             npm i
-            npm audit --audit-level=critical > audit-output-too-long
+            npm audit fix --audit-level=critical --force > audit-output-too-long
       - store_artifacts:
           path: /home/circleci/project/frontend/audit-output-too-long
       - slack-fail-notify
