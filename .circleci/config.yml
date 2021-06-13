@@ -376,12 +376,11 @@ jobs:
           name: Update cloudfront distribution
           command: |
             export OldWorkflowID=$(aws cloudformation list-exports --query "Exports[?Name==\`WorkflowID\`].Value" --no-paginate --output text)
-            export Stacks=$(aws cloudformation list-stacks --query 'StackSummaries[*].StackName' --stack-status-filter CREATE_COMPLETE --no-paginate --output text | rev | cut -c -7 | rev)
+            export Stacks=$(aws cloudformation list-stacks --qdduery 'StackSummaries[*].StackName' --stack-status-filter CREATE_COMPLETE --no-paginate --output text | rev | cut -c -7 | rev)
             echo $OldWorkflowID
             echo $Stacks
             aws cloudformation deploy \
               --template-file .circleci/files/cloudfront.yml \
-              #              --stack-name AWSLearnCloudFront \
               --stack-name udapeople-cloudfront \
               --region ${AWS_DEFAULT_REGION} \
               --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}"
@@ -389,16 +388,6 @@ jobs:
             aws cloudfront create-invalidation \
               --distribution-id ESV7NO1O67LOH \
               --paths "/*"
-            
-
-            if [ "$Stacks" != "$OldWorkflowID" ]
-            then
-              aws cloudformation delete-stack --stack-name "backend-${OldWorkflowID}"
-              aws cloudformation delete-stack --stack-name "frontend-${OldWorkflowID}"
-            fi
-      - destroy-environment
-      - slack-fail-notify
-      - slack-pass-notify
 
 workflows:
   version: 2
