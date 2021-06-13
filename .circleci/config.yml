@@ -384,7 +384,7 @@ jobs:
               --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}"
 
             aws cloudfront create-invalidation \
-              --distribution-id ESV7NO1O67LOH \
+              --distribution-id E1QV8ZMRIERELT \
               --paths "/*"
 
             Stacks=""
