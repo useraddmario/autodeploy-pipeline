@@ -465,14 +465,14 @@ workflows:
           requires: [test-frontend, test-backend, scan-frontend, scan-backend]
           filters:
             branches:
-              only: [master]
+              only: [master, ec2parse]
       - configure-infrastructure:
           requires: [deploy-infrastructure]
           context:
             - slack
           filters:
             branches:
-              only: [master]
+              only: [master, ec2parse]
       - run-migrations:
           requires: [configure-infrastructure]
           context:
@@ -480,7 +480,7 @@ workflows:
             - slack
           filters:
             branches:
-              only: [master]
+              only: [master, ec2parse]
       - deploy-frontend:
           requires: [run-migrations]
           context:
@@ -488,7 +488,7 @@ workflows:
             - slack
           filters:
             branches:
-              only: [master]
+              only: [master, ec2parse]
       - deploy-backend:
           requires: [deploy-frontend]
           context:
@@ -496,7 +496,7 @@ workflows:
             - slack
           filters:
             branches:
-              only: [master]
+              only: [master, ec2parse]
       - backend-smoke-test:
           requires: [deploy-backend, deploy-frontend]
           context:
@@ -504,7 +504,7 @@ workflows:
             - slack
           filters:
             branches:
-              only: [master]
+              only: [master, ec2parse]
       - frontend-smoke-test:
           requires: [deploy-backend, deploy-frontend]
           context:
@@ -512,7 +512,7 @@ workflows:
             - slack
           filters:
             branches:
-              only: [master]
+              only: [master, ec2parse]
       - cloudfront-update:
           requires: [frontend-smoke-test, backend-smoke-test]
           context:
@@ -520,4 +520,4 @@ workflows:
             - slack
           filters:
             branches:
-              only: [master]
+              only: [master, ec2parse]
