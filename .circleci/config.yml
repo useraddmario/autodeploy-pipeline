@@ -209,6 +209,7 @@ jobs:
             echo [ec2] >> .circleci/ansible/inventory
             test=$(aws ec2 describe-instances \
               --filter Name=tag-value,Values=udapeople-backend \
+              --filter Name=instance-state-name,Values=running \
               --query 'Reservations[].Instances[].[PublicIpAddress, Tags[?Key==`workflowid`].Value[]][][]' \
               --output text)
             test2=$(echo $test | cut -d ' ' -f 3,4 --output-delimiter=$':')
