@@ -206,7 +206,21 @@ jobs:
             touch .circleci/ansible/inventory
             >.circleci/ansible/inventory
             echo [ec2] >> .circleci/ansible/inventory
-            aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:project,Values=udapeople-backend" --output text >> .circleci/ansible/inventory
+            test=$(aws ec2 describe-instances \
+              --filter Name=tag-value,Values=udapeople-backend \
+              --query 'Reservations[].Instances[].[PublicIpAddress, Tags[?Key==`workflowid`].Value[]][][]' \
+              --output text)
+            test2=$(echo $test | cut -d ' ' -f 3,4 --output-delimiter=$':')
+            test1=$(echo $test | cut -d ' ' -f 1,2 --output-delimiter=$':')
+            
+            for each in $test1 $test2
+            do
+                if [[ ${CIRCLE_WORKFLOW_ID:0:7} == ${each:13} ]]; then
+                    echo ${each:0:12} >> .circleci/ansible/inventory
+                fi  
+            done
+
+            cat .circleci/ansible/inventory
       - persist_to_workspace:
           root: ~/project/.circleci/ansible/
           paths:
