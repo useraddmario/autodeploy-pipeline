@@ -5,7 +5,7 @@ Parameters:
     Description: Unique CircleCI ID
     Type: String
   USWest2AMI:
-    Description:
+    Description: AMI for us-west-2
     Type: String
     Default: ami-06e54d05255faf8f6
 
