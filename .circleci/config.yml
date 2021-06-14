@@ -51,7 +51,6 @@ commands:
       - run: 
           name: Remove S3 artifacts for failed deployment
           command: |
-            exit 0
             aws s3 rb s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --force
             aws cloudformation delete-stack --stack-name "frontend-${CIRCLE_WORKFLOW_ID:0:7}" 
             aws cloudformation wait stack-delete-complete --stack-name "frontend-${CIRCLE_WORKFLOW_ID:0:7}" 
@@ -209,7 +208,7 @@ jobs:
             echo [ec2] >> .circleci/ansible/inventory
             
             aws cloudformation list-exports \
-              --query 'Exports[?Name==`EC2InstancePublicIP`].Value[]' \
+              --query 'Exports[?Name==`EC2PublicIP-${ID}`].Value[]' \
               --output text >> .circleci/ansible/inventory
 
             cat .circleci/ansible/inventory
@@ -285,7 +284,7 @@ jobs:
             pwd
             touch ec2ipaddy
             export BACKEND_IP=$(aws cloudformation list-exports \
-              --query 'Exports[?Name==`EC2InstancePublicIP`].Value[]' \
+              --query 'Exports[?Name==`EC2PublicIP-${ID}`].Value[]' \
               --output text)
             export API_URL=http://$BACKEND_IP:3030
             echo $API_URL
@@ -340,7 +339,7 @@ jobs:
           name: Backend smoke test
           command: |
             export BACKEND_IP=$(aws cloudformation list-exports \
-              --query 'Exports[?Name==`EC2InstancePublicIP`].Value[]' \
+              --query 'Exports[?Name==`EC2PublicIP-${ID}`].Value[]' \
               --output text)
             export API_URL=http://$BACKEND_IP:3030/api/status
             echo $API_URL
@@ -387,7 +386,8 @@ jobs:
           name: Update cloudfront distribution
           command: |
             export OldWorkflowID=$(aws cloudformation list-exports --query "Exports[?Name==\`WorkflowID\`].Value" --no-paginate --output text)
-            echo $OldWorkflowID
+            Stacks=false
+
             aws cloudformation deploy \
               --template-file .circleci/files/cloudfront.yml \
               --stack-name udapeople-cloudfront \
@@ -398,25 +398,24 @@ jobs:
               --distribution-id E1QV8ZMRIERELT \
               --paths "/*"
 
-            Stacks=""
-
             for each in $(aws cloudformation list-stacks \
               --query 'StackSummaries[*].StackName' \
               --stack-status-filter CREATE_COMPLETE \
               --no-paginate --output text)
             do
-              echo $each
-              if [[ $each == backend* ]];then 
-                Stacks=$(echo $each | cut -d '-' -f2)
-              fi
+              if [[ $each == "backend-$OldWorkflowID" ]]
+              then
+                Stacks=true
+              fi  
             done
 
-            echo $each
-
-            if [ "$Stacks" != "$OldWorkflowID" ]
+            if $Stacks
             then
-              aws cloudformation delete-stack --stack-name "backend-${OldWorkflowID}"
-              aws cloudformation delete-stack --stack-name "frontend-${OldWorkflowID}"
+              aws s3 rb s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --force
+              aws cloudformation delete-stack --stack-name "frontend-${CIRCLE_WORKFLOW_ID:0:7}"
+              aws cloudformation wait stack-delete-complete --stack-name "frontend-${CIRCLE_WORKFLOW_ID:0:7}"
+              aws cloudformation delete-stack --stack-name "backend-${CIRCLE_WORKFLOW_ID:0:7}"
+              aws cloudformation wait stack-delete-complete --stack-name "backend-${CIRCLE_WORKFLOW_ID:0:7}"
             fi
                   - destroy-environment
                   - slack-fail-notify
