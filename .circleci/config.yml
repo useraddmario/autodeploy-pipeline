@@ -400,11 +400,13 @@ jobs:
               fi
             done
 
+            echo $each
 
             if [ "$Stacks" != "$OldWorkflowID" ]
             then
-              aws cloudformation delete-stack --stack-name "backend-${OldWorkflowID}"
-              aws cloudformation delete-stack --stack-name "frontend-${OldWorkflowID}"
+              echo "First Run"
+              #  aws cloudformation delete-stack --stack-name "backend-${OldWorkflowID}"
+              #  aws cloudformation delete-stack --stack-name "frontend-${OldWorkflowID}"
             fi
             #      - destroy-environment
             #      - slack-fail-notify
