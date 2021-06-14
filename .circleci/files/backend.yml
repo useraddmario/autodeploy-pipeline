@@ -42,8 +42,8 @@ Resources:
           Value: !Sub backend-${ID}
 
 Outputs:
-  EC2PublicIP${ID}:
+  EC2PublicIP:
     Description: Backend EC2 Instance Public IPv4
     Value: !GetAtt BackendEC2Instance.PublicIp
     Export:
-      Name: EC2PublicIP${ID}
+      Name: !Sub EC2PublicIP${ID}
