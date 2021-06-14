@@ -207,22 +207,13 @@ jobs:
             touch .circleci/ansible/inventory
             >.circleci/ansible/inventory
             echo [ec2] >> .circleci/ansible/inventory
-            test=$(aws ec2 describe-instances \
-              --filter Name=tag-value,Values=udapeople-backend \
-              --filter Name=instance-state-name,Values=running \
-              --query 'Reservations[].Instances[].[PublicIpAddress, Tags[?Key==`workflowid`].Value[]][][]' \
-              --output text)
-            test2=$(echo $test | cut -d ' ' -f 3,4 --output-delimiter=$':')
-            test1=$(echo $test | cut -d ' ' -f 1,2 --output-delimiter=$':')
             
-            for each in $test1 $test2
-            do
-                if [[ ${CIRCLE_WORKFLOW_ID:0:7} == ${each:13} ]]; then
-                    echo ${each:0:12} >> .circleci/ansible/inventory
-                fi  
-            done
+            aws cloudformation list-exports \
+              --query 'Exports[?Name==`EC2InstancePublicIP`].Value[]' \
+              --output text >> .circleci/ansible/inventory
 
             cat .circleci/ansible/inventory
+
       - persist_to_workspace:
           root: ~/project/.circleci/ansible/
           paths:
@@ -293,7 +284,9 @@ jobs:
           command: |
             pwd
             touch ec2ipaddy
-            export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:project,Values=udapeople-backend" --output text)
+            export BACKEND_IP=$(aws cloudformation list-exports \
+              --query 'Exports[?Name==`EC2InstancePublicIP`].Value[]' \
+              --output text)
             export API_URL=http://$BACKEND_IP:3030
             echo $API_URL
             cd frontend
@@ -346,7 +339,9 @@ jobs:
       - run:
           name: Backend smoke test
           command: |
-            export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:project,Values=udapeople-backend" --output text)
+            export BACKEND_IP=$(aws cloudformation list-exports \
+              --query 'Exports[?Name==`EC2InstancePublicIP`].Value[]' \
+              --output text)
             export API_URL=http://$BACKEND_IP:3030/api/status
             echo $API_URL
             echo $BACKEND_IP

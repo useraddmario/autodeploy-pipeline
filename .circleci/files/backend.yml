@@ -1,10 +1,13 @@
-Description: >
-  backend stack.
+Description: backend stack
 
 Parameters:
   ID:
-    Description: Unique identifier.
+    Description: Unique CircleCI ID
     Type: String
+  USWest2AMI:
+    Description:
+    Type: String
+    Default: ami-06e54d05255faf8f6
 
 Resources:
   InstanceSecurityGroup:
@@ -26,14 +29,21 @@ Resources:
           ToPort: 9100
           CidrIp: 0.0.0.0/0
 
-  EC2Instance:
+  BackendEC2Instance:
     Type: AWS::EC2::Instance
     Properties:
       InstanceType: t2.micro
       SecurityGroups:
         - Ref: InstanceSecurityGroup
       KeyName: udacity
-      ImageId: ami-06e54d05255faf8f6
+      ImageId: !Ref USWest2AMI
       Tags:
         - Key: Name
           Value: !Sub backend-${ID}
+
+Outputs:
+  EC2InstancePublicIP:
+    Description: Backend EC2 Instance Public IPv4
+    Value: !GetAtt BackendEC2Instance.PublicIp
+    Export:
+      Name: EC2InstancePublicIP
