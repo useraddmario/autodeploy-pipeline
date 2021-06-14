@@ -208,7 +208,7 @@ jobs:
             echo [ec2] >> .circleci/ansible/inventory
             
             aws cloudformation list-exports \
-              --query 'Exports[?Name==`EC2PublicIP-${ID}`].Value[]' \
+              --query 'Exports[?Name==`EC2PublicIP${ID}`].Value[]' \
               --output text >> .circleci/ansible/inventory
 
             cat .circleci/ansible/inventory
@@ -284,7 +284,7 @@ jobs:
             pwd
             touch ec2ipaddy
             export BACKEND_IP=$(aws cloudformation list-exports \
-              --query 'Exports[?Name==`EC2PublicIP-${ID}`].Value[]' \
+              --query 'Exports[?Name==`EC2PublicIP${ID}`].Value[]' \
               --output text)
             export API_URL=http://$BACKEND_IP:3030
             echo $API_URL
@@ -339,7 +339,7 @@ jobs:
           name: Backend smoke test
           command: |
             export BACKEND_IP=$(aws cloudformation list-exports \
-              --query 'Exports[?Name==`EC2PublicIP-${ID}`].Value[]' \
+              --query 'Exports[?Name==`EC2PublicIP${ID}`].Value[]' \
               --output text)
             export API_URL=http://$BACKEND_IP:3030/api/status
             echo $API_URL
