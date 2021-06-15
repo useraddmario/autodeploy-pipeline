@@ -351,9 +351,9 @@ jobs:
               exit 1
             fi
       - revert-migrations        
-      - destroy-environment
-      - slack-fail-notify
-      - slack-pass-notify
+        #- destroy-environment
+        #- slack-fail-notify
+        #- slack-pass-notify
   frontend-smoke-test:
     docker:
       - image: amazon/aws-cli
@@ -411,15 +411,15 @@ jobs:
 
             if $Stacks
             then
-              aws s3 rb s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --force
-              aws cloudformation delete-stack --stack-name "frontend-${CIRCLE_WORKFLOW_ID:0:7}"
-              aws cloudformation wait stack-delete-complete --stack-name "frontend-${CIRCLE_WORKFLOW_ID:0:7}"
-              aws cloudformation delete-stack --stack-name "backend-${CIRCLE_WORKFLOW_ID:0:7}"
-              aws cloudformation wait stack-delete-complete --stack-name "backend-${CIRCLE_WORKFLOW_ID:0:7}"
+              aws s3 rb s3://udapeople-$OldWorkflowID --force
+              aws cloudformation delete-stack --stack-name "frontend-$OldWorkflowID"
+              aws cloudformation wait stack-delete-complete --stack-name "frontend-$OldWorkflowID"
+              aws cloudformation delete-stack --stack-name "backend-$OldWorkflowID"
+              aws cloudformation wait stack-delete-complete --stack-name "backend-$OldWorkflowID"
             fi
-                  - destroy-environment
-                  - slack-fail-notify
-                  - slack-pass-notify
+            #- destroy-environment
+            #- slack-fail-notify
+            #- slack-pass-notify
 
 workflows:
   version: 2
