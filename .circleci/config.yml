@@ -405,9 +405,13 @@ jobs:
             do
               if [[ $each == "backend-$OldWorkflowID" ]]
               then
+                echo $each
                 Stacks=true
               fi  
             done
+
+            echo $Stacks
+            echo $OldWorkflowID
 
             if $Stacks
             then
@@ -417,9 +421,9 @@ jobs:
               aws cloudformation delete-stack --stack-name "backend-$OldWorkflowID"
               aws cloudformation wait stack-delete-complete --stack-name "backend-$OldWorkflowID"
             fi
-            #- destroy-environment
-            #- slack-fail-notify
-            #- slack-pass-notify
+      - destroy-environment
+      - slack-fail-notify
+      - slack-pass-notify
 
 workflows:
   version: 2
